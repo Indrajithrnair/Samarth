@@ -1,4 +1,3 @@
-import openai
 import json
 import re
 from typing import Dict, List, Any
@@ -9,8 +8,7 @@ from data_validator import data_validator
 class QueryProcessor:
     def __init__(self):
         self.data_scraper = DataScraper()
-        # You'll need to set your OpenAI API key
-        # openai.api_key = "your-api-key-here"
+        # OpenAI integration can be added later if needed
         
     async def process_question(self, question: str) -> Dict[str, Any]:
         """Process a natural language question and return structured answer"""
