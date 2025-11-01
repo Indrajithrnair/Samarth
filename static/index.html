@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Samarth - Government Data Q&A</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: white;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+        
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .question-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .question-input:focus {
+            border-color: #007bff;
+        }
+        
+        .send-btn {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .send-btn:hover {
+            background: #0056b3;
+        }
+        
+        .send-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .sources {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: normal;
+        }
+        
+        .sources h4 {
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .source-item {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        
+        .examples {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .examples h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .example-question {
+            background: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: 1px solid #e9ecef;
+        }
+        
+        .example-question:hover {
+            background: #e9ecef;
+        }
+        
+        .data-table {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .quality-info {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: normal;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Project Samarth</h1>
+            <p>Intelligent Q&A System for Government Agricultural & Climate Data</p>
+        </div>
+        
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message bot-message">
+                    <strong>Welcome to Project Samarth!</strong><br>
+                    I can help you analyze agricultural and climate data from the Indian Government's data.gov.in portal. 
+                    Ask me questions about crop production, rainfall patterns, and their correlations across different states and districts.
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div>Analyzing government datasets...</div>
+            </div>
+            
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="questionInput" 
+                    class="question-input" 
+                    placeholder="Ask about agricultural production, rainfall, or climate patterns..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button onclick="sendQuestion()" id="sendBtn" class="send-btn">Send</button>
+            </div>
+        </div>
+        
+        <div class="examples">
+            <h3>Example Questions:</h3>
+            <div class="example-question" onclick="setQuestion(this.textContent)">
+                Compare rice production in Maharashtra and Punjab for 2023
+            </div>
+            <div class="example-question" onclick="setQuestion(this.textContent)">
+                What is the rainfall pattern in Maharashtra districts?
+            </div>
+            <div class="example-question" onclick="setQuestion(this.textContent)">
+                Show me crop production data for wheat in northern states
+            </div>
+            <div class="example-question" onclick="setQuestion(this.textContent)">
+                Analyze the relationship between rainfall and rice production
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendQuestion() {
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            // Add user message
+            addMessage(question, 'user');
+            
+            // Clear input and show loading
+            input.value = '';
+            showLoading(true);
+            
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage(data.answer, 'bot', data.sources, data.response_time, data.confidence);
+                } else {
+                    addMessage('Sorry, I encountered an error processing your question. Please try again.', 'bot');
+                }
+            } catch (error) {
+                addMessage('Sorry, I could not connect to the server. Please check your connection and try again.', 'bot');
+            }
+            
+            showLoading(false);
+        }
+        
+        function addMessage(text, sender, sources = null, responseTime = null, confidence = null) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            let messageContent = text;
+            
+            if (sources && sources.length > 0) {
+                messageContent += '<div class="sources"><h4>Data Sources:</h4>';
+                sources.forEach(source => {
+                    messageContent += `<div class="source-item">• ${source.type}: ${source.source}</div>`;
+                });
+                messageContent += '</div>';
+            }
+            
+            // Add performance and quality indicators
+            if (responseTime || confidence) {
+                messageContent += '<div class="quality-info" style="margin-top: 10px; padding: 8px; background: #f0f8ff; border-radius: 5px; font-size: 0.85em;">';
+                if (responseTime) {
+                    messageContent += `Response time: ${responseTime} `;
+                }
+                if (confidence) {
+                    messageContent += `Confidence: ${confidence.replace('_', ' ')}`;
+                }
+                messageContent += '</div>';
+            }
+            
+            messageDiv.innerHTML = messageContent;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            loading.style.display = show ? 'block' : 'none';
+            sendBtn.disabled = show;
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendQuestion();
+            }
+        }
+        
+        function setQuestion(question) {
+            document.getElementById('questionInput').value = question;
+        }
+    </script>
+</body>
+</html>
