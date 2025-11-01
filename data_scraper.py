@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-import pandas as pd
 import time
 from typing import Dict, List, Any
 import os
